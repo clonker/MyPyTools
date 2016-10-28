@@ -3,8 +3,7 @@ import numpy as np
 import scipy.io
 import scipy.optimize as opt
 import super_resolution_tools as srt
-
-np.set_printoptions(threshold=np.nan)
+import time
 
 def insert_trans_rot_frame(vf, f_pad, dx, dy, th):
     sin_th = np.sin(th)
@@ -58,8 +57,14 @@ for i in range(10):
     f1_padded = np.zeros([lmax, lmax])
     f1_padded_control = np.zeros([lmax, lmax])
 
+    start = time.time()
     srt.insert_trans_rot_frame (vframes[i], f1_padded, 0.0, 0.0, 0.0)
+    end = time.time()
+    print("srt: %s" % (end - start))
+    start = time.time()
     insert_trans_rot_frame(vframes[i], f1_padded_control, 0.0, 0.0, 0.0)
+    end = time.time()
+    print("py: %s" % (end - start))
 
     np.testing.assert_array_almost_equal(f1_padded, f1_padded_control)
 

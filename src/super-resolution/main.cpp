@@ -41,7 +41,7 @@ namespace py = pybind11;
  *
  */
 
-void insert_trans_rot_frame(py::array_t<double> &vf, py::array_t<double> &f_pad, double dx, double dy, double th) {
+void insert_trans_rot_frame(py::array_t<double> &vf, py::array_t<double> &f_pad, double dx, double dy, double th, double scale) {
     const auto sin_th = sin(th);
     const auto cos_th = cos(th);
 
@@ -57,8 +57,8 @@ void insert_trans_rot_frame(py::array_t<double> &vf, py::array_t<double> &f_pad,
     double *data_vf = vf.mutable_data(0);
     double *data_fpad = f_pad.mutable_data(0);
     for (std::size_t i = 0; i < info_vf.shape[0]; ++i) {
-        xr.push_back(cos_th * data_vf[info_vf.shape[1] * i + 0] - sin_th * data_vf[info_vf.shape[1] * i + 1]);
-        yr.push_back(sin_th * data_vf[info_vf.shape[1] * i + 0] + cos_th * data_vf[info_vf.shape[1] * i + 1]);
+        xr.push_back(scale*(cos_th * data_vf[info_vf.shape[1] * i + 0] - sin_th * data_vf[info_vf.shape[1] * i + 1]));
+        yr.push_back(scale*(sin_th * data_vf[info_vf.shape[1] * i + 0] + cos_th * data_vf[info_vf.shape[1] * i + 1]));
     }
 
     for (std::size_t i = 0; i < info_vf.shape[0]; ++i) {
