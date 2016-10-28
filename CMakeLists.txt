@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.3)
 project(PyTools)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+ADD_SUBDIRECTORY(libs/pybind11)
 
-set(SOURCE_FILES main.cpp)
-add_executable(PyTools ${SOURCE_FILES})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+pybind11_add_module(super_resolution_tools src/super-resolution/main.cpp)
