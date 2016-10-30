@@ -4,42 +4,29 @@
 
 namespace py = pybind11;
 
+void median_noise_reduction(py::array_t<double> &target, py::array_t<double>& vf, const std::size_t window_width, const std::size_t window_height) {
 
-/**
- *
- * def insert_trans_rot_frame(vf, f_pad, dx, dy, th):
-    sin_th = np.sin(th)
-    cos_th = np.cos(th)
+    const auto info_target = target.request(true);
+    const auto info_vf = vf.request(false);
 
-    cx = int(np.floor(0.5 * f_pad.shape[0]) + dx)
-    cy = int(np.floor(0.5 * f_pad.shape[1]) + dy)
+    std::vector<double> window;
+    window.resize(window_width * window_height);
 
-    xr = cos_th * vf[:, 0] - sin_th * vf[:, 1]
-    yr = sin_th * vf[:, 0] + cos_th * vf[:, 1]
+    const auto edge_x = floor(window_width / 2.);
+    const auto edge_y = floor(window_height / 2.);
 
-    for i in range(vf.shape[0]):
-        ind_x = int(np.floor(xr[i]))
-        ind_y = int(np.floor(yr[i]))
-
-        frac_x = xr[i] - ind_x
-        frac_y = yr[i] - ind_y
-
-        # f_pad[int (cx + ind_x), int (cy - ind_y)] += vf[i, 2]
-
-        corn1_x = (cx + ind_x) % f_pad.shape[0]
-        corn1_y = (cy - ind_y) % f_pad.shape[1]
-
-        corn2_x = (cx + ind_x + 1) % f_pad.shape[0]
-        corn2_y = (cy - ind_y - 1) % f_pad.shape[1]
-
-        # bilinear interpolation
-        f_pad[corn1_x, corn1_y] += (1.0 - frac_x) * (1.0 - frac_y) * vf[i, 2]
-        f_pad[corn2_x, corn1_y] += frac_x * (1.0 - frac_y) * vf[i, 2]
-        f_pad[corn1_x, corn2_y] += (1.0 - frac_x) * frac_y * vf[i, 2]
-        f_pad[corn2_x, corn2_y] += frac_x * frac_y * vf[i, 2]
- *
- *
- */
+    for(auto x = edge_x; x < info_vf.shape[1]; ++x) {
+        for(auto y = edge_y; y < info_vf.shape[0]; ++y) {
+            std::size_t i = 0;
+            for(auto fx = 0; fx < window_width; ++ fx) {
+                for(auto fy = 0; fy < window_height; ++fy) {
+                    // window[i] =
+                    ++i;
+                }
+            }
+        }
+    }
+}
 
 void insert_trans_rot_frame(py::array_t<double> &vf, py::array_t<double> &f_pad, double dx, double dy, double th, double scale) {
     const auto sin_th = sin(th);
