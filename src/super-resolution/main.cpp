@@ -4,10 +4,40 @@
 
 namespace py = pybind11;
 
-void median_noise_reduction(py::array_t<double> &target, py::array_t<double>& vf, const std::size_t window_width, const std::size_t window_height) {
+void remove_sprinkles(py::array_t<double> &target, py::array_t<double>& frames) {
+    const auto info_vf = frames.request(false);
+    const auto w = info_vf.shape[0];
+
+    auto data_input = (double(*)[w]) frames.data(0);
+    auto data_target = (double(*)[w]) target.data(0);
+
+    for(int x = 1; x < w-1; ++x) {
+        for(int y = 1; y < w-1; ++y) {
+
+            int n_neighbors = 0;
+            for(int dx = -1; dx < 1; ++dx) {
+                for(int dy = -1; dy < 1; ++dy) {
+                    if(!(dx == 0 && dy == 0)) {
+                        if(data_input[x + dx][y + dy] != 0) {
+                            ++n_neighbors;
+                        }
+                    }
+                }
+            }
+            if(n_neighbors >= 3) {
+                data_target[x][y] = data_input[x][y];
+            } else {
+                data_target[x][y] = 0;
+            }
+
+        }
+    }
+}
+
+void median_noise_reduction(py::array_t<double> &target, py::array_t<double>& frames, const std::size_t window_width, const std::size_t window_height) {
 
     const auto info_target = target.request(true);
-    const auto info_vf = vf.request(false);
+    const auto info_vf = frames.request(false);
 
     std::vector<double> window;
     window.resize(window_width * window_height);
@@ -15,15 +45,40 @@ void median_noise_reduction(py::array_t<double> &target, py::array_t<double>& vf
     const auto edge_x = floor(window_width / 2.);
     const auto edge_y = floor(window_height / 2.);
 
+    auto data_input = (double(*)[372]) frames.data(0);
+    auto data_target = (double(*)[372]) target.data(0);
+
+    for(int x = 1; x < 371; ++x) {
+        for(int y = 1; y < 371; ++y) {
+            int n_neighbors = 0;
+            for(int dx = -1; dx < 1; ++dx) {
+                for(int dy = -1; dy < 1; ++dy) {
+                    if(!(dx == 0 && dy == 0)) {
+                        if(data_input[x + dx][y + dy] != 0) {
+                            ++n_neighbors;
+                        }
+                    }
+                }
+            }
+            if(n_neighbors <= 4) {
+
+            }
+        }
+    }
+
     for(auto x = edge_x; x < info_vf.shape[1]; ++x) {
         for(auto y = edge_y; y < info_vf.shape[0]; ++y) {
             std::size_t i = 0;
             for(auto fx = 0; fx < window_width; ++ fx) {
                 for(auto fy = 0; fy < window_height; ++fy) {
-                    // window[i] =
+                    window[i] = data_input[static_cast<std::size_t>(x + fx - edge_x)][static_cast<std::size_t>(y + fy - edge_y)];
                     ++i;
                 }
             }
+            // sort entries in window[]
+            std::sort(window.begin(), window.end());
+            data_target[(int) x][(int) y] = window[(int) (.5 * window_width * window_height)];
+            // outputPixelValue[x][y] := window[window width * window height / 2]
         }
     }
 }
@@ -79,6 +134,8 @@ PYBIND11_PLUGIN(super_resolution_tools) {
     py::module m("super_resolution_tools");
 
     m.def("insert_trans_rot_frame", &insert_trans_rot_frame);
+    m.def("median_noise_reduction", &median_noise_reduction);
+    m.def("remove_sprinkles", &remove_sprinkles);
     m.def("get_idx", &get_idx);
 
     return m.ptr();
