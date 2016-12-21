@@ -1,9 +1,8 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.io
-import scipy.optimize as opt
-import super_resolution_tools as srt
 import time
+
+import numpy as np
+import super_resolution_tools as srt
+
 
 def insert_trans_rot_frame(vf, f_pad, dx, dy, th):
     sin_th = np.sin(th)
@@ -68,6 +67,6 @@ for i in range(10):
 
     np.testing.assert_array_almost_equal(f1_padded, f1_padded_control)
 
-#print f1_padded
-#print "---"*30
-#print f1_padded_control
+    #print f1_padded
+    #print "---"*30
+    #print f1_padded_control
